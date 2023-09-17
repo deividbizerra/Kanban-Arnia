@@ -33,7 +33,8 @@ const Home = () => {
   
      
       setCards([...cards, response]);
-  
+     
+
       
       setNewCardTitle("");
       setNewCardContent("");
