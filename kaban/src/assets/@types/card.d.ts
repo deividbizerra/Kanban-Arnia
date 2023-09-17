@@ -1,4 +1,4 @@
-type Colum = "TODO" | "ROING" | "DONE"
+type Colum = "TODO" | "DOING" | "DONE"
 
 type Card = {
   _id: string;
@@ -6,3 +6,9 @@ type Card = {
   content: string;
   column: Colum;
 };
+
+interface NewCardData {
+  title: string;
+  content: string;
+}
+

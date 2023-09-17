@@ -1,23 +1,43 @@
-import React, { useState, useEffect } from "react";
-import {DeletCart, getCardsFromAPI } from "../../../services/card/card";
+import { Dispatch, SetStateAction } from "react";
+import { DeletCart, updateCardService } from "../../../services/card/card";
+import { Box, Column } from "./styled";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons"; // Importe o ícone "faTrash" da biblioteca FontAwesome
 
+type Props = {
+  title: string;
+  cards: Card[];
+  setCards: Dispatch<SetStateAction<Card[]>>;
+};
 
+const Cards = ({ title, cards, setCards }: Props) => {
+  
+  const updateCard = async (card: Card, position: "left" | "right") => {
+    let column = card.column;
 
-const KanbanBoard: React.FC = () => {
-  const [cards, setCards] = useState<Card[]>([])
+    if (["TODO", "DONE"].includes(column)) {
+      column = "DOING";
+    } else if (position === "left") {
+      column = "TODO";
+    } else {
+      column = "DONE";
+    }
 
-  useEffect(() => {
-    const fetchCards = async () => {
-      try {
-        const apiCards = await getCardsFromAPI();
-        setCards(apiCards);
-      } catch (error) {
-        console.error("Erro ao buscar os cartões da API:", error);
-      }
-    };
-    fetchCards();
-  }, []);
+    const response = await updateCardService({
+      ...card,
+      column,
+    });
 
+    setCards(response);
+  };
+
+  const moveToLeft = (card: Card) => {
+    updateCard(card, "left");
+  };
+
+  const moveToRight = (card: Card) => {
+    updateCard(card, "right");
+  };
 
   const onDeleteCart = async (id:string) => {
     const newCards = await DeletCart(id)
@@ -26,22 +46,39 @@ const KanbanBoard: React.FC = () => {
     }
   }
 
- return(
-  <>
-  <div>
-    COLUNA FIXA
-  </div>
-  <div>
-    TODO
-  </div>
-  <div>
-    DOING
-  </div>
-  <div>
-    DONE
-  </div>
-  </>
- )
+
+  return (
+    <Column>
+      <h1>{title}</h1>
+
+      <div>
+        {cards.map((card) => (
+          <Box key={card._id}>
+            <h3>{card.title}</h3>
+            <div>{card.content}</div>
+
+            <div>
+
+            
+
+
+              {card.column !== "TODO" && (
+                <button onClick={() => moveToLeft(card)}> &lt;</button>
+              )}
+              <FontAwesomeIcon icon={faTrash} onClick={()=> onDeleteCart(card._id)}/>
+              {card.column !== "DONE" && (
+                <button onClick={() => moveToRight(card)} >
+  
+                  &gt;
+                </button>
+              )}
+              
+            </div>
+          </Box>
+        ))}
+      </div>
+    </Column>
+  );
 };
 
-export default KanbanBoard;
+export default Cards;
